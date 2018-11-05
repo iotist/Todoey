@@ -10,15 +10,28 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["Uy", "Univer", "Ish"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let savedItems = defaults.array(forKey: "ToDoListArray") as? [String] {
-            itemArray = savedItems
+        let newItem = Item()
+        newItem.title = "Uy"
+        itemArray.append(newItem)
+        
+        let newItem1 = Item()
+        newItem1.title = "Univer"
+        itemArray.append(newItem1)
+        
+        let newItem2 = Item()
+        newItem2.title = "Ish"
+        itemArray.append(newItem2)
+        
+        
+        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
+            itemArray = items
         }
         
     }
@@ -30,11 +43,23 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
         
+        cell.textLabel?.text = item.title
         
+        // Ternary operator ==> Bu uslub if/else operatotidan ancha qulay va qisqa
+        // value = condition ? valueIfTrue : valueIfFalse
+        
+        cell.accessoryType = item.done ? .checkmark : .none // pasdegi 5 qator kod bn birhil ishni bajaradi
+        
+//        if item.done == true {
+//            cell.accessoryType = .checkmark
+//        } else {
+//            cell.accessoryType = .none
+//        }
         
         return cell
         
@@ -43,27 +68,22 @@ class TodoListViewController: UITableViewController {
     // MARK: - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-            
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+//        if itemArray[indexPath.row].done == false { // yuqoridegi =! belgi shu 5 qatorga yozilgan
+                                                      // kodni vazifasini bajaradi
+//            itemArray[indexPath.row].done = true
+//        } else {
+//            itemArray[indexPath.row].done = false
+//        }
+        
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        
-        
+      
     }
-    
 
-    override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        
-        
-        
-    }
     
     // MARK: - Adding new items
     
@@ -76,7 +96,10 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             // what will happen whne user clicks the ADD button..
            
-            self.itemArray.append(alertText.text!)
+            let newItem = Item()
+            newItem.title = alertText.text!
+            
+            self.itemArray.append(newItem)
             
             self.defaults.set(self.itemArray, forKey: "ToDoListArray")
             
